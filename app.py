@@ -22,7 +22,7 @@ DISCORD_TOKEN = os.getenv("discord_token")
 
 intents = discord.Intents().all()
 client = discord.Client(intents=intents)
-bot = commands.Bot(command_prefix='$', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 
 # Suppress noise about console usage from errors
