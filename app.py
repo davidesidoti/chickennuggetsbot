@@ -528,6 +528,12 @@ async def cat_(ctx):
 @bot.command(name='meme', description="sends a random meme")
 async def meme_(ctx):
     """Send a random meme"""
+    
+    if ctx.channel.id != 997092433047343114:
+        embed = discord.Embed(
+            title="Error!", description="This command is only available in the <#997092433047343114> channel", color=discord.Color.red())
+        await ctx.send(embed=embed)
+        return
 
     r = requests.get('https://meme-api.herokuapp.com/gimme/memes')
 
