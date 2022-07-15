@@ -518,10 +518,22 @@ class Music(commands.Cog):
 async def cat_(ctx):
     """Send a random cat image."""
     r = requests.get('https://aws.random.cat/meow')
-    
+
     embed = discord.Embed(
         title="MEOW", description="", color=discord.Color.green())
     embed.set_image(url=json.loads(r.text).get('file'))
+    await ctx.send(embed=embed)
+
+
+@bot.command(name='meme', description="sends a random meme")
+async def meme_(ctx):
+    """Send a random meme"""
+
+    r = requests.get('https://meme-api.herokuapp.com/gimme/memes')
+
+    embed = discord.Embed(
+        title="MEME", description="", color=discord.Color.green())
+    embed.set_image(url=json.loads(r.text).get('url'))
     await ctx.send(embed=embed)
 
 
