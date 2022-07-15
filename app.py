@@ -16,8 +16,7 @@ from youtube_dl import YoutubeDL
 
 load_dotenv()
 # Get the API token from the .env file.
-# DISCORD_TOKEN = os.getenv("discord_token")
-DISCORD_TOKEN = "OTk3MTg1NzU5ODc2NDk3NDQ5.GGVPtu.uH38vfEvTx45UQ4Z736jjWDuTb_-jN87J--NC4"
+DISCORD_TOKEN = os.getenv("discord_token")
 
 intents = discord.Intents().all()
 client = discord.Client(intents=intents)
