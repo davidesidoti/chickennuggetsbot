@@ -1,4 +1,6 @@
 # WaLLE
+import requests
+import json
 import discord
 from discord.ext import commands
 import random
@@ -20,7 +22,7 @@ DISCORD_TOKEN = os.getenv("discord_token")
 
 intents = discord.Intents().all()
 client = discord.Client(intents=intents)
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix='$', intents=intents)
 
 
 # Suppress noise about console usage from errors
@@ -509,6 +511,18 @@ class Music(commands.Cog):
         await ctx.send('**Successfully disconnected**')
 
         await self.cleanup(ctx.guild)
+
+
+# ANCHOR IMAGES COMMANDS
+@bot.command(name='cat', aliases=['kitty'], description="sends a random cat image")
+async def cat_(ctx):
+    """Send a random cat image."""
+    r = requests.get('https://aws.random.cat/meow')
+    
+    embed = discord.Embed(
+        title="MEOW", description="", color=discord.Color.green())
+    embed.set_image(url=json.loads(r.text).get('file'))
+    await ctx.send(embed=embed)
 
 
 @bot.event
