@@ -84,6 +84,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         if 'entries' in data:
             # take first item from a playlist
+            print('Playlist found!\n' + data['entries'])
             data = data['entries'][0]
 
         embed = discord.Embed(
