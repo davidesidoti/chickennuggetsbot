@@ -513,7 +513,7 @@ class Music(commands.Cog):
         await self.cleanup(ctx.guild)
 
 
-# ANCHOR IMAGES COMMANDS
+# ANCHOR CAT
 @bot.command(name='cat', aliases=['kitty'], description="sends a random cat image")
 async def cat_(ctx):
     """Send a random cat image."""
@@ -525,10 +525,11 @@ async def cat_(ctx):
     await ctx.send(embed=embed)
 
 
+# ANCHOR MEME
 @bot.command(name='meme', description="sends a random meme")
 async def meme_(ctx):
     """Send a random meme"""
-    
+
     if ctx.channel.id != 997092433047343114:
         embed = discord.Embed(
             title="Error!", description="This command is only available in the <#997092433047343114> channel", color=discord.Color.red())
@@ -540,6 +541,24 @@ async def meme_(ctx):
     embed = discord.Embed(
         title="MEME", description="", color=discord.Color.green())
     embed.set_image(url=json.loads(r.text).get('url'))
+    await ctx.send(embed=embed)
+
+
+# ANCHOR QUOTE
+@bot.command(name='quote', aliases=['quotes'], description="sends a random quote")
+async def quote_(ctx):
+    """Send a random quote"""
+
+    if ctx.channel.id != 997169441592840303:
+        embed = discord.Embed(
+            title="Error!", description="This command is only available in the <#997169441592840303> channel", color=discord.Color.red())
+        await ctx.send(embed=embed)
+        return
+
+    r = requests.get('https://zenquotes.io/api/random')
+
+    embed = discord.Embed(
+        title="QUOTE", description=f"“{json.loads(r.text)[0].get('q')}” — {json.loads(r.text)[0].get('a')} ", color=discord.Color.green())
     await ctx.send(embed=embed)
 
 
