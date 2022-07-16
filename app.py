@@ -23,7 +23,7 @@ DISCORD_TOKEN = os.getenv('discord_token')
 
 intents = discord.Intents().all()
 client = discord.Client(intents=intents)
-bot = commands.Bot(command_prefix='$', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 
 # Suppress noise about console usage from errors
@@ -528,10 +528,14 @@ class Music(commands.Cog):
 @bot.command(name='cat', aliases=['kitty'], description="sends a random cat image")
 async def cat_(ctx):
     """Send a random cat image."""
+    
+    # gets a random cat image from the api
     r = requests.get('https://aws.random.cat/meow')
 
+    #create the message
     embed = discord.Embed(
         title="MEOW", description="", color=discord.Color.green())
+    #                   get only the url of the image
     embed.set_image(url=json.loads(r.text).get('file'))
     await ctx.send(embed=embed)
 
