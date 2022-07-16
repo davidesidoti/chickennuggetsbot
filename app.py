@@ -1,4 +1,5 @@
 # WaLLE
+from ast import alias
 import requests
 import json
 import discord
@@ -18,13 +19,12 @@ from youtube_dl import YoutubeDL
 
 load_dotenv()
 # Get the API token from the .env file.
-DISCORD_TOKEN = os.getenv("discord_token")
+DISCORD_TOKEN = "OTI1NTMzMDg2MjYxODcwNjUy.Gm5aEQ.kZfY06PuQU-3t9Ejc2bouXqlf8NewLU4msXFw8"
 
 intents = discord.Intents().all()
 client = discord.Client(intents=intents)
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix='$', intents=intents)
 
-bot.remove_command('help')
 
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -33,7 +33,7 @@ ytdlopts = {
     'format': 'bestaudio/best',
     'outtmpl': 'downloads/%(extractor)s-%(id)s-%(title)s.%(ext)s',
     'restrictfilenames': True,
-    'noplaylist': True,
+    'noplaylist': False,
     'nocheckcertificate': True,
     'ignoreerrors': False,
     'logtostderr': False,
@@ -84,19 +84,26 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         to_run = partial(ytdl.extract_info, url=search, download=download)
         data = await loop.run_in_executor(None, to_run)
-
+        
         if 'entries' in data:
             # take first item from a playlist
-            data = data['entries'][0]
+            # data = data['entries'][0]
+            embed = discord.Embed(
+                title="", description=f"Queued playlist [{data['title']}]({data['webpage_url']}) [{ctx.author.mention}]", color=discord.Color.green())
+            await ctx.send(embed=embed)
+        else:
+            embed = discord.Embed(
+                title="", description=f"Queued [{data['title']}]({data['webpage_url']}) [{ctx.author.mention}]", color=discord.Color.green())
+            await ctx.send(embed=embed)
 
-        embed = discord.Embed(
-            title="", description=f"Queued [{data['title']}]({data['webpage_url']}) [{ctx.author.mention}]", color=discord.Color.green())
-        await ctx.send(embed=embed)
 
         if download:
             source = ytdl.prepare_filename(data)
         else:
-            return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
+            if 'entries' in data:
+                return data
+            else:
+                return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
 
         return cls(discord.FFmpegPCMAudio(source), data=data, requester=ctx.author)
 
@@ -274,6 +281,7 @@ class Music(commands.Cog):
             await ctx.message.add_reaction('👍')
         await ctx.send(f'**Joined `{channel}`**')
 
+    # ANCHOR PLAY
     @commands.command(name='play', aliases=['sing', 'p'], description="streams music")
     async def play_(self, ctx, *, search: str):
         """Request a song and add it to the queue.
@@ -297,7 +305,9 @@ class Music(commands.Cog):
         # If download is True, source will be a discord.FFmpegPCMAudio with a VolumeTransformer.
         source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
 
-        await player.queue.put(source)
+        for song in source['entries']:
+            src = {'webpage_url': song["webpage_url"], 'requester': ctx.author, 'title':song["title"]}
+            await player.queue.put(src)
 
     @commands.command(name='pause', description="pauses music")
     async def pause_(self, ctx):
@@ -563,46 +573,35 @@ async def quote_(ctx):
     await ctx.send(embed=embed)
 
 
-# ANCHOR HACK
 @bot.command(name='hack', description="calls hecker to hack someone")
 @commands.has_permissions(manage_nicknames=True)
 async def hecker_(ctx, *, user: discord.Member):
     """Calls hecker to hack someone"""
 
-    embed = discord.Embed(title="Starting hacking",
-                          description="hecker#8499", color=0x645034)
-    embed.set_author(
-        name="HECKER", icon_url="https://static.wikia.nocookie.net/beluga/images/9/9c/Hecker.jpg/revision/latest?cb=20210904163641")
-    embed.add_field(name="HACKING PROGRESS",
-                    value="|>         | 0%", inline=True)
+    embed=discord.Embed(title="Starting hacking", description="hecker#8499", color=0x645034)
+    embed.set_author(name="HECKER", icon_url="https://static.wikia.nocookie.net/beluga/images/9/9c/Hecker.jpg/revision/latest?cb=20210904163641")
+    embed.add_field(name="HACKING PROGRESS", value="|>         | 0%", inline=True)
     embed.set_footer(text="i'm always watching")
     msg = await ctx.send(embed=embed)
     await asyncio.sleep(0.5)
-
+    
     for i in range(1, 11):
-        embed = discord.Embed(title="Starting hacking",
-                              description="hecker#8499", color=0x645034)
-        embed.set_author(
-            name="HECKER", icon_url="https://static.wikia.nocookie.net/beluga/images/9/9c/Hecker.jpg/revision/latest?cb=20210904163641")
+        embed=discord.Embed(title="Starting hacking", description="hecker#8499", color=0x645034)
+        embed.set_author(name="HECKER", icon_url="https://static.wikia.nocookie.net/beluga/images/9/9c/Hecker.jpg/revision/latest?cb=20210904163641")
         equals = "=" * i
         progress = i * 10
-        embed.add_field(name="HACKING PROGRESS",
-                        value=f"|{equals}>         | {progress}%", inline=True)
+        embed.add_field(name="HACKING PROGRESS", value=f"|{equals}>         | {progress}%", inline=True)
         embed.set_footer(text="i'm always watching")
         await msg.edit(embed=embed)
         await asyncio.sleep(0.5)
-
+        
     await asyncio.sleep(0.5)
-    embed = discord.Embed(title="Starting hacking",
-                          description="hecker#8499", color=0x645034)
-    embed.set_author(
-        name="HECKER", icon_url="https://static.wikia.nocookie.net/beluga/images/9/9c/Hecker.jpg/revision/latest?cb=20210904163641")
-    embed.add_field(name="HACKING PROGRESS",
-                    value="|==========> | 100%", inline=True)
-    embed.add_field(name="HACKING COMPLETE",
-                    value=f"{user.mention} has been hacked", inline=False)
+    embed=discord.Embed(title="Starting hacking", description="hecker#8499", color=0x645034)
+    embed.set_author(name="HECKER", icon_url="https://static.wikia.nocookie.net/beluga/images/9/9c/Hecker.jpg/revision/latest?cb=20210904163641")
+    embed.add_field(name="HACKING PROGRESS", value="|==========> | 100%", inline=True)
+    embed.add_field(name="HACKING COMPLETE", value=f"{user.mention} has been hacked", inline=False)
     embed.set_footer(text="i'm always watching")
-    await msg.edit(embed=embed)
+    await ctx.send(embed=embed)
     await user.edit(nick="HACKED")
 
 
