@@ -24,6 +24,7 @@ intents = discord.Intents().all()
 client = discord.Client(intents=intents)
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+bot.remove_command('help')
 
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -562,6 +563,7 @@ async def quote_(ctx):
     await ctx.send(embed=embed)
 
 
+# ANCHOR HACK
 @bot.command(name='hack', description="calls hecker to hack someone")
 @commands.has_permissions(manage_nicknames=True)
 async def hecker_(ctx, *, user: discord.Member):
@@ -600,7 +602,7 @@ async def hecker_(ctx, *, user: discord.Member):
     embed.add_field(name="HACKING COMPLETE",
                     value=f"{user.mention} has been hacked", inline=False)
     embed.set_footer(text="i'm always watching")
-    await ctx.send(embed=embed)
+    await msg.edit(embed=embed)
     await user.edit(nick="HACKED")
 
 
