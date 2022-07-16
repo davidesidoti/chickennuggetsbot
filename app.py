@@ -562,6 +562,48 @@ async def quote_(ctx):
     await ctx.send(embed=embed)
 
 
+@bot.command(name='hack', description="calls hecker to hack someone")
+@commands.has_permissions(manage_nicknames=True)
+async def hecker_(ctx, *, user: discord.Member):
+    """Calls hecker to hack someone"""
+
+    embed = discord.Embed(title="Starting hacking",
+                          description="hecker#8499", color=0x645034)
+    embed.set_author(
+        name="HECKER", icon_url="https://static.wikia.nocookie.net/beluga/images/9/9c/Hecker.jpg/revision/latest?cb=20210904163641")
+    embed.add_field(name="HACKING PROGRESS",
+                    value="|>         | 0%", inline=True)
+    embed.set_footer(text="i'm always watching")
+    msg = await ctx.send(embed=embed)
+    await asyncio.sleep(0.5)
+
+    for i in range(1, 11):
+        embed = discord.Embed(title="Starting hacking",
+                              description="hecker#8499", color=0x645034)
+        embed.set_author(
+            name="HECKER", icon_url="https://static.wikia.nocookie.net/beluga/images/9/9c/Hecker.jpg/revision/latest?cb=20210904163641")
+        equals = "=" * i
+        progress = i * 10
+        embed.add_field(name="HACKING PROGRESS",
+                        value=f"|{equals}>         | {progress}%", inline=True)
+        embed.set_footer(text="i'm always watching")
+        await msg.edit(embed=embed)
+        await asyncio.sleep(0.5)
+
+    await asyncio.sleep(0.5)
+    embed = discord.Embed(title="Starting hacking",
+                          description="hecker#8499", color=0x645034)
+    embed.set_author(
+        name="HECKER", icon_url="https://static.wikia.nocookie.net/beluga/images/9/9c/Hecker.jpg/revision/latest?cb=20210904163641")
+    embed.add_field(name="HACKING PROGRESS",
+                    value="|==========> | 100%", inline=True)
+    embed.add_field(name="HACKING COMPLETE",
+                    value=f"{user.mention} has been hacked", inline=False)
+    embed.set_footer(text="i'm always watching")
+    await ctx.send(embed=embed)
+    await user.edit(nick="HACKED")
+
+
 @bot.event
 async def on_ready():
     for guild in bot.guilds:
