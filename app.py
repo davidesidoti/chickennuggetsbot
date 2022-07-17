@@ -15,6 +15,8 @@ from async_timeout import timeout
 from functools import partial
 import youtube_dl
 from youtube_dl import YoutubeDL
+import time
+import datetime
 
 
 load_dotenv()
@@ -89,7 +91,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
             # take first item from a playlist
             # data = data['entries'][0]
             embed = discord.Embed(
-                title="", description=f"Queued playlist [{data['title']}]({data['webpage_url']}) [{ctx.author.mention}]. It may take a while.", color=discord.Color.green())
+                title="", description=f"Queued playlist [{data['title']}]({data['webpage_url']}) [{ctx.author.mention}]", color=discord.Color.green())
             await ctx.send(embed=embed)
         else:
             embed = discord.Embed(
@@ -128,7 +130,7 @@ class MusicPlayer:
     """
 
     __slots__ = ('bot', '_guild', '_channel', '_cog',
-                 'queue', 'next', 'current', 'np', 'volume')
+                 'queue', 'next', 'current', 'np', 'volume', 'current_time')
 
     def __init__(self, ctx):
         self.bot = ctx.bot
@@ -142,9 +144,11 @@ class MusicPlayer:
         self.np = None  # Now playing message
         self.volume = .5
         self.current = None
+        self.current_time = 0
 
         ctx.bot.loop.create_task(self.player_loop())
 
+    # ANCHOR player_loop
     async def player_loop(self):
         """Our main player loop."""
         await self.bot.wait_until_ready()
@@ -172,6 +176,7 @@ class MusicPlayer:
             source.volume = self.volume
             self.current = source
 
+            self.current_time = time.time()
             self._guild.voice_client.play(
                 source, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
             embed = discord.Embed(
@@ -304,11 +309,16 @@ class Music(commands.Cog):
         # If download is True, source will be a discord.FFmpegPCMAudio with a VolumeTransformer.
         source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
 
-        for song in source['entries']:
-            src = {'webpage_url': song["webpage_url"],
-                   'requester': ctx.author, 'title': song["title"]}
-            await player.queue.put(src)
+        if 'entries' in source:
+            # It's a playlist
+            for song in source['entries']:
+                src = {'webpage_url': song["webpage_url"],
+                       'requester': ctx.author, 'title': song["title"]}
+                await player.queue.put(src)
+        else:
+            await player.queue.put(source)
 
+    # ANCHOR PAUSE
     @commands.command(name='pause', description="pauses music")
     async def pause_(self, ctx):
         """Pause the currently playing song."""
@@ -324,6 +334,7 @@ class Music(commands.Cog):
         vc.pause()
         await ctx.send("Paused ⏸️")
 
+    # ANCHOR RESUME
     @commands.command(name='resume', description="resumes music")
     async def resume_(self, ctx):
         """Resume the currently paused song."""
@@ -339,6 +350,7 @@ class Music(commands.Cog):
         vc.resume()
         await ctx.send("Resuming ⏯️")
 
+    # ANCHOR SKIP
     @commands.command(name='skip', aliases=['next'], description="skips to next song in queue")
     async def skip_(self, ctx):
         """Skip the song."""
@@ -356,6 +368,7 @@ class Music(commands.Cog):
 
         vc.stop()
 
+    # ANCHOR REMOVE
     @commands.command(name='remove', aliases=['rm', 'rem'], description="removes specified song from queue")
     async def remove_(self, ctx, pos: int = None):
         """Removes specified song from queue"""
@@ -382,6 +395,7 @@ class Music(commands.Cog):
                     title="", description=f'Could not find a track for "{pos}"', color=discord.Color.green())
                 await ctx.send(embed=embed)
 
+    # ANCHOR CLEAR
     @commands.command(name='clear', aliases=['clr', 'cl', 'cr'], description="clears entire queue")
     async def clear_(self, ctx):
         """Deletes entire queue of upcoming songs."""
@@ -397,6 +411,7 @@ class Music(commands.Cog):
         player.queue._queue.clear()
         await ctx.send('**Cleared**')
 
+    # ANCHOR QUEUE
     @commands.command(name='queue', aliases=['q', 'playlist', 'que'], description="shows the queue")
     async def queue_info(self, ctx):
         """Retrieve a basic queue of upcoming songs."""
@@ -437,6 +452,7 @@ class Music(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    # ANCHOR NOW PLAYING
     @commands.command(name='np', aliases=['song', 'current', 'currentsong', 'playing'], description="shows the current playing song")
     async def now_playing_(self, ctx):
         """Display information about the currently playing song."""
@@ -454,21 +470,29 @@ class Music(commands.Cog):
             return await ctx.send(embed=embed)
 
         seconds = vc.source.duration % (24 * 3600)
-        hour = seconds // 3600
-        seconds %= 3600
-        minutes = seconds // 60
-        seconds %= 60
-        if hour > 0:
-            duration = "%dh %02dm %02ds" % (hour, minutes, seconds)
-        else:
-            duration = "%02dm %02ds" % (minutes, seconds)
+
+        time_played = time.time() - player.current_time
+        progress_perc = round(time_played / seconds * 30)
+
+        duration = datetime.timedelta(seconds=round(seconds))
+
+        progress_bar = "──────────────────────────────"[
+            :progress_perc] + "⚪" + "──────────────────────────────"[progress_perc+1:]
+
+        time_now = datetime.timedelta(seconds=round(time_played))
 
         embed = discord.Embed(
             title="", description=f"[{vc.source.title}]({vc.source.web_url}) [{vc.source.requester.mention}] | `{duration}`", color=discord.Color.green())
         embed.set_author(icon_url=self.bot.user.avatar_url,
                          name=f"Now Playing 🎶")
+        embed.add_field(
+            # ⚪
+            name="Progress", value=f"{progress_bar}", inline=False)
+        embed.add_field(
+            name="** **", value=f"──── ◄◄⠀▐▐ ⠀►►⠀⠀ ⠀ {time_now} / {duration} ⠀ ───○ 🔊", inline=False)
         await ctx.send(embed=embed)
 
+    # ANCHOR VOLUME
     @commands.command(name='volume', aliases=['vol', 'v'], description="changes Kermit's volume")
     async def change_volume(self, ctx, *, vol: float = None):
         """Change the player volume.
@@ -504,6 +528,7 @@ class Music(commands.Cog):
             title="", description=f'**`{ctx.author}`** set the volume to **{vol}%**', color=discord.Color.green())
         await ctx.send(embed=embed)
 
+    # ANCHOR LEAVE
     @commands.command(name='leave', aliases=["stop", "dc", "disconnect", "bye"], description="stops music and disconnects from voice")
     async def leave_(self, ctx):
         """Stop the currently playing song and destroy the player.
@@ -528,14 +553,10 @@ class Music(commands.Cog):
 @bot.command(name='cat', aliases=['kitty'], description="sends a random cat image")
 async def cat_(ctx):
     """Send a random cat image."""
-
-    # gets a random cat image from the api
     r = requests.get('https://aws.random.cat/meow')
 
-    # create the message
     embed = discord.Embed(
         title="MEOW", description="", color=discord.Color.green())
-    #                   get only the url of the image
     embed.set_image(url=json.loads(r.text).get('file'))
     await ctx.send(embed=embed)
 
