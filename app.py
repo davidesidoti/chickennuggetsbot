@@ -640,6 +640,21 @@ async def hecker_(ctx, *, user: discord.Member):
     await user.edit(nick="HACKED")
 
 
+@bot.command(name='welcome', description="welcome testing message")
+async def welcome_(ctx):
+    """welcome testing message"""
+
+    embed = discord.Embed(title="Welcome to the server",
+                          description="Welcome to the server little chicken nuggets muffin with pieces of bananas on it", color=0x645034)
+    embed.set_author(
+        name="A LITTLE KITTY CAT", icon_url="https://static.wikia.nocookie.net/beluga/images/9/9c/Hecker.jpg/revision/latest?cb=20210904163641")
+    embed.add_field(name="COOKIE", value="🍪", inline=True)
+    embed.add_field(name="BANANA", value="🍌", inline=True)
+    embed.add_field(name="TERMS AND CONDITIONS",
+                    value="IF YOU DONT GET A COOKIE WE WILL SLAP YOUR A$$ :D", inline=True)
+    await ctx.send(embed=embed)
+
+
 @bot.event
 async def on_ready():
     for guild in bot.guilds:
