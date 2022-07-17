@@ -639,7 +639,7 @@ async def hecker_(ctx, *, user: discord.Member):
                     value=f"{user.mention} has been hacked", inline=False)
     embed.set_footer(text="i'm always watching")
     await ctx.send(embed=embed)
-    await user.edit(nick="HACKED")
+    await user.edit(nick="IM A BAD PERSON")
 
 
 @bot.command(name='help', description="sends a help message")
