@@ -651,7 +651,7 @@ async def welcome_(ctx):
     embed.add_field(name="COOKIE", value="🍪", inline=True)
     embed.add_field(name="BANANA", value="🍌", inline=True)
     embed.add_field(name="TERMS AND CONDITIONS",
-                    value="IF YOU DONT GET A COOKIE WE WILL SLAP YOUR A$$ :D", inline=True)
+                    value="IF YOU DONT GET A COOKIE WE WILL SLAP YOUR A$$ :D", inline=False)
     await ctx.send(embed=embed)
 
 
