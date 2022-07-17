@@ -27,6 +27,8 @@ intents = discord.Intents().all()
 client = discord.Client(intents=intents)
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+bot.remove_command('help')
+
 
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -652,6 +654,18 @@ async def welcome_(ctx):
     embed.add_field(name="BANANA", value="🍌", inline=True)
     embed.add_field(name="TERMS AND CONDITIONS",
                     value="IF YOU DONT GET A COOKIE WE WILL SLAP YOUR A$$ :D", inline=False)
+    await ctx.send(embed=embed)
+
+
+@bot.command(name='help', description="sends a help message")
+async def help_(ctx):
+    """Help message"""
+
+    embed = discord.Embed(title="Help message",
+                          description="You don't need help dumba$$. The commands are the same as all other servers -.-", color=0x645034)
+    embed.set_author(
+        name="A LITTLE KITTY CAT", icon_url="https://static.wikia.nocookie.net/beluga/images/9/9c/Hecker.jpg/revision/latest?cb=20210904163641")
+    embed.set_footer(text="`dumba$$ again`")
     await ctx.send(embed=embed)
 
 
